@@ -1,0 +1,7 @@
+*.iml
+*.tsv
+*.xml
+*.egg-info
+fjlc/res/tweets/*
+__pycache__/
+
