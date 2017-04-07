@@ -1,4 +1,5 @@
 import sys
+from os import path
 import fjlc.classifier.classifier_options as classifier_options
 import fjlc.preprocessing.filters.canonical_form as canonical_form
 from fjlc.lexicon.container.prior_polarity_lexicon import PriorPolarityLexicon
@@ -74,7 +75,10 @@ public class Main {
 
 class LexiconClassifier:
 
-    def __init__(self, lexicon="fjlc/res/data/lexicon.pmi.json", options="fjlc/res/data/options.pmi.json", dictionary="res/dictionary.json"):
+    def __init__(self,
+                 lexicon=path.join(path.abspath(path.dirname(__file__)), "res/data/lexicon.pmi.json"),
+                 options=path.join(path.abspath(path.dirname(__file__)), "res/data/options.pmi.json"),
+                 dictionary=path.join(path.abspath(path.dirname(__file__)), "res/dictionary.json")):
         self.lexicon = lexicon
         self.options = options
         self.dictionary = dictionary
