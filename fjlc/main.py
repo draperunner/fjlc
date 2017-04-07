@@ -83,17 +83,30 @@ class LexiconClassifier:
         self.options = options
         self.dictionary = dictionary
 
-    @staticmethod
-    def lol():
-        print("LOL!")
-
-    def continuous_classification(self):
         classifier_options.load_options(self.options)
         canonical_form.load_dictionary(self.dictionary)
 
-        prior_polarity_lexicon = PriorPolarityLexicon(self.lexicon)
-        classifier = Classifier(prior_polarity_lexicon, lexical_classifier.CLASSIFIER_FILTERS)
+        self.prior_polarity_lexicon = PriorPolarityLexicon(self.lexicon)
+        self.classifier = Classifier(self.prior_polarity_lexicon, lexical_classifier.CLASSIFIER_FILTERS)
 
-        for tweet in sys.stdin:
-            print(classifier.classify(tweet))
-            # print(classifier.calculate_sentiment(tweet))
+    def classify(self, tweets):
+        """
+        Classify tweet or tweets
+        :param tweets: String or array of strings to classify.
+        :return: String or array of strings depicting sentiment. Sentiment can be POSITIVE, NEGATIVE or NEUTRAL.
+        """
+        if type(tweets) == str:
+            return self.classifier.classify(tweets)
+
+        return list(map(lambda tweet: self.classifier.classify(tweet), tweets))
+
+    def calculate_sentiment(self, tweets):
+        """
+        Classify tweet or tweets
+        :param tweets: String or array of strings to classify.
+        :return: Float or array of floats depicting sentiment value.
+        """
+        if type(tweets) == str:
+            return self.classifier.calculate_sentiment(tweets)
+
+        return list(map(lambda tweet: self.classifier.calculate_sentiment(tweet), tweets))
