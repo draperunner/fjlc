@@ -1,69 +1,48 @@
 from enum import Enum
-"""
-
-import com.freva.masteroppgave.preprocessing.filters.Filters;
-import com.freva.masteroppgave.utils.progressbar.Progressable;
-import com.freva.masteroppgave.utils.reader.DataSetReader.DataSetEntry;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-
-public class DataSetReader implements Iterator<DataSetEntry>, Iterable<DataSetEntry>, Progressable {
-    private static final Pattern tab_regex = Pattern.compile("\t");
-
-    private final LineReader lineReader;
-    private final int tweetIndex;
-    private final int classIndex;
-
-    public DataSetReader(File file, int tweetIndex, int classIndex) throws IOException {
-        lineReader = new LineReader(file);
-        this.tweetIndex = tweetIndex;
-        this.classIndex = classIndex;
-    }
-
-    public boolean hasNext() {
-        return lineReader.hasNext();
-    }
-
-    public DataSetEntry next() {
-        return new DataSetEntry(lineReader.next(), tweetIndex, classIndex);
-    }
-
-    public Iterator<DataSetEntry> iterator() {
-        return this;
-    }
-
-    public double getProgress() {
-        return lineReader.getProgress();
-    }
+import re
+from fjlc.utils.reader.line_reader import LineReader
 
 
-    public class DataSetEntry {
-        private final Classification classification;
-        private String tweet;
-
-        public DataSetEntry(String line, int tweetIndex, int classIndex) {
-            String[] values = tab_regex.split(line);
-            tweet = values[tweetIndex];
-            classification = Classification.parseClassificationFromString(values[classIndex]);
-        }
+TAB_REGEX = re.compile("\t")
 
 
-        public String getTweet() {
-            return tweet;
-        }
+class DataSetReader:
 
-        public Classification getClassification() {
-            return classification;
-        }
+    def __init__(self, file_name, tweet_index, class_index):
+        self.line_reader = LineReader(file_name)
+        self.tweet_index = tweet_index
+        self.class_index = class_index
 
-        public void applyFilters(Filters filters) {
-            tweet = filters.apply(tweet);
-        }
-    }
-"""
+    def has_next(self):
+        return self.line_reader.has_next()
+
+    def __next__(self):
+        if not self.has_next():
+            raise StopIteration
+        return DataSetEntry(self.line_reader.__next__(), self.tweet_index, self.class_index)
+
+    def __iter__(self):
+        return self
+
+    def get_progress(self):
+        return self.line_reader.get_progress()
+
+
+class DataSetEntry:
+
+    def __init__(self, line, tweet_index, class_index):
+        values = TAB_REGEX.split(line)
+        self.tweet = values[tweet_index]
+        self.classification = Classification.parse_classification_from_string(values[class_index])
+
+    def get_tweet(self):
+        return self.tweet
+
+    def get_classification(self):
+        return self.classification
+
+    def apply_filters(self, filters):
+        self.tweet = filters.apply(self.tweet)
 
 
 class Classification(Enum):

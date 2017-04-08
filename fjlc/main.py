@@ -1,80 +1,66 @@
-import sys
 from os import path
+
 import fjlc.classifier.classifier_options as classifier_options
-import fjlc.preprocessing.filters.canonical_form as canonical_form
-from fjlc.lexicon.container.prior_polarity_lexicon import PriorPolarityLexicon
-from fjlc.classifier.classifier import Classifier
 import fjlc.lexical_classifier as lexical_classifier
+import fjlc.preprocessing.filters.canonical_form as canonical_form
+from fjlc.classifier.classifier import Classifier
+from fjlc.lexicon.container.prior_polarity_lexicon import PriorPolarityLexicon
+from fjlc.preprocessing.filters.filters import Filters
+from fjlc.preprocessing.preprocessors.tweet_n_grams_pmi import TweetNGramsPMI
+from fjlc.utils import json_utils, map_utils
+from fjlc.lexicon.lexicon_creator import LexiconCreator
+from fjlc.utils.reader.data_set_reader import DataSetReader
+from fjlc.utils.reader.line_reader import LineReader
 
-"""
-import com.freva.masteroppgave.classifier.Classifier;
-import com.freva.masteroppgave.classifier.ClassifierOptions;
-import com.freva.masteroppgave.lexicon.LexiconCreator;
-import com.freva.masteroppgave.lexicon.container.PriorPolarityLexicon;
-import com.freva.masteroppgave.preprocessing.filters.CanonicalForm;
-import com.freva.masteroppgave.preprocessing.filters.Filters;
-import com.freva.masteroppgave.preprocessing.preprocessors.TweetNGramsPMI;
-import com.freva.masteroppgave.utils.JSONUtils;
-import com.freva.masteroppgave.utils.MapUtils;
-import com.freva.masteroppgave.utils.progressbar.ProgressBar;
-import com.freva.masteroppgave.utils.reader.DataSetReader;
-import com.freva.masteroppgave.utils.reader.LineReader;
-import com.google.gson.reflect.TypeToken;
+N_GRAM_STRING_FILTERS = [
+    Filters.html_unescape, Filters.remove_unicode_emoticons, Filters.normalize_form, Filters.remove_url,
+    Filters.remove_rt_tag, Filters.remove_hashtag, Filters.remove_username, Filters.remove_emoticons,
+    Filters.remove_free_digits, str.lower
+]
+N_GRAM_CHARACTER_FILTERS = [
+    Filters.remove_inner_word_characters, Filters.remove_non_syntactical_text, canonical_form.correct_word_via_canonical
+]
+N_GRAM_FILTERS = Filters(N_GRAM_STRING_FILTERS, N_GRAM_CHARACTER_FILTERS)
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-
-public class Main {
-    public static final List<Function<String, String>> N_GRAM_STRING_FILTERS = Arrays.asList(
-            Filters::HTMLUnescape, Filters::removeUnicodeEmoticons, Filters::normalizeForm, Filters::removeURL,
-            Filters::removeRTTag, Filters::removeHashtag, Filters::removeUsername, Filters::removeEmoticons,
-            Filters::removeFreeDigits, String::toLowerCase);
-    public static final List<Function<String, String>> N_GRAM_CHARACTER_FILTERS = Arrays.asList(
-            Filters::removeInnerWordCharacters, Filters::removeNonSyntacticalText, CanonicalForm::correctWordViaCanonical);
-    public static final Filters N_GRAM_FILTERS = new Filters(N_GRAM_STRING_FILTERS, N_GRAM_CHARACTER_FILTERS);
-
-    public static final List<Function<String, String>> TWEET_STRING_FILTERS = Arrays.asList(
-            Filters::HTMLUnescape, Filters::parseUnicodeEmojisToAlias, Filters::normalizeForm, Filters::removeURL,
-            Filters::removeRTTag, Filters::protectHashtag, Filters::removeEMail, Filters::removeUsername,
-            Filters::removeFreeDigits, Filters::parseEmoticons, String::toLowerCase);
-    public static final List<Function<String, String>> TWEET_CHARACTER_FILTERS = Arrays.asList(
-            Filters::removeInnerWordCharacters, Filters::removeNonAlphanumericalText, CanonicalForm::correctWordViaCanonical);
-    public static final Filters TWEET_FILTERS = new Filters(TWEET_STRING_FILTERS, TWEET_CHARACTER_FILTERS);
+TWEET_STRING_FILTERS = [
+    Filters.html_unescape, Filters.parse_unicode_emojis_to_alias, Filters.normalize_form, Filters.remove_url,
+    Filters.remove_rt_tag, Filters.protect_hashtag, Filters.remove_email, Filters.remove_username,
+    Filters.remove_free_digits, Filters.parse_emoticons, str.lower
+]
+TWEET_CHARACTER_FILTERS = [Filters.remove_inner_word_characters, Filters.remove_non_alphanumerical_text,
+                           canonical_form.correct_word_via_canonical]
+TWEET_FILTERS = Filters(TWEET_STRING_FILTERS, TWEET_CHARACTER_FILTERS)
 
 
-    public static void main(String[] args) {
-        try {
-            continuousClassification(new File(args[0]), new File(args[1]), new File(args[2]));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+class Lexicon:
+    def __init__(self, n_grams_file, data_set_file, lexicon_file, max_error_rate, sentiment_value_threshold):
+        self.n_grams_file = n_grams_file
+        self.data_set_file = data_set_file
+        self.lexicon_file = lexicon_file
+        self.max_error_rate = max_error_rate
+        self.sentiment_value_threshold = sentiment_value_threshold
 
-    public static void createLexicon(File nGramsFile, File dataSetFile, File lexiconFile, double maxErrorRate, double sentimentValueThreshold) throws IOException {
-        Set<String> frequentNGrams = JSONUtils.fromJSONFile(nGramsFile, new TypeToken<Set<String>>(){});
-        DataSetReader dataSetReader = new DataSetReader(dataSetFile, 1, 0);
+    def create_lexicon(self):
+        frequent_n_grams = json_utils.from_json_file(self.n_grams_file)
+        data_set_reader = DataSetReader(self.data_set_file, 1, 0)
 
-        LexiconCreator lexiconCreator = new LexiconCreator();
-        ProgressBar.trackProgress(lexiconCreator, "Creating lexicon...");
-        Map<String, Double> lexicon = lexiconCreator.createLexicon(dataSetReader, frequentNGrams, maxErrorRate, sentimentValueThreshold, TWEET_FILTERS);
-        JSONUtils.toJSONFile(lexiconFile, MapUtils.sortMapByValue(lexicon), true);
-    }
+        lexicon_creator = LexiconCreator()
+        # ProgressBar.track_progress(lexicon_creator, "Creating lexicon...")
+        lexicon = lexicon_creator.create_lexicon(data_set_reader, frequent_n_grams, self.max_error_rate,
+                                                 self.sentiment_value_threshold, TWEET_FILTERS)
+        json_utils.to_json_file(self.lexicon_file, map_utils.sort_map_by_value(lexicon), True)
 
-    public static void generateNGrams(File input, File output, int nGramRange, double cutoffFrequency, double PMIValueThreshold) throws IOException {
-        TweetNGramsPMI tweetNGrams = new TweetNGramsPMI();
-        ProgressBar.trackProgress(tweetNGrams, "Generating tweet n-grams...");
-        List<String> ngrams = tweetNGrams.getFrequentNGrams(new LineReader(input), nGramRange, cutoffFrequency, PMIValueThreshold, N_GRAM_FILTERS);
+    @staticmethod
+    def generate_n_grams(input_file, output_file, n_gram_range, cutoff_frequency, pmi_value_threshold):
+        tweet_n_grams = TweetNGramsPMI()
+        # ProgressBar.track_progress(tweet_n_grams, "Generating tweet n-grams...")
+        ngrams = tweet_n_grams.get_frequent_n_grams(LineReader(input_file), n_gram_range, cutoff_frequency,
+                                                    pmi_value_threshold, N_GRAM_FILTERS)
 
-        JSONUtils.toJSONFile(output, ngrams, true);
-    }
-}
-"""
+        json_utils.to_json_file(output_file, ngrams, True)
 
 
 class LexiconClassifier:
-
     def __init__(self,
                  lexicon=path.join(path.abspath(path.dirname(__file__)), "res/data/lexicon.pmi.json"),
                  options=path.join(path.abspath(path.dirname(__file__)), "res/data/options.pmi.json"),

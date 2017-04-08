@@ -1,19 +1,39 @@
-package com.freva.masteroppgave.utils;
-
-import java.util.*;
-
-public class MapUtils {
-    /**
-     * Sorts Map by value. Map values must implement Comparable.
-     *
-     * @param map Map to sort
-     * @return Sorted map
-     */
-    public static <K, V extends Comparable<V>> Map<K, V> sortMapByValue(Map<K, V> map) {
-        return sortMapWithComparator(map, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-    }
+def sort_map_by_value(dictionary):
+    """
+    Sorts Map by value. Map values must implement Comparable.
+    
+    :param dictionary: Map to sort 
+    :return: Sorted map 
+    """
+    return sorted(dictionary, key=dictionary.get)
 
 
+def normalize_map_between(dictionary, norm_min, norm_max):
+    """
+    Performs linear normalization of all values in Map between normMin and normMax
+
+    :param: map     Map to normalize values for
+    :param: normMin Smallest normalized value
+    :param: normMax Largest normalized value
+    :return: A new map with double values within [normMin, normMax]
+    """
+    if len(dictionary) < 2:
+        return {}
+
+    values = list(dictionary.values())
+
+    norm_range = norm_max - norm_min
+    map_min = min(values)
+    map_range = max(values) - map_min
+    range_factor = norm_range / float(map_range)
+
+    normalized_map = {}
+    for key, value in dictionary.items():
+        normalized_map[key] = norm_min + (value - map_min) * range_factor
+
+    return normalized_map
+
+"""
     /**
      * Sorts map given a comparator
      *
@@ -43,32 +63,6 @@ public class MapUtils {
      */
     public synchronized static <T> void incrementMapByValue(Map<T, Integer> map, T key, int increment) {
         map.put(key, map.getOrDefault(key, 0) + increment);
-    }
-
-
-    /**
-     * Performs linear normalization of all values in Map between normMin and normMax
-     *
-     * @param map     Map to normalize values for
-     * @param normMin Smallest normalized value
-     * @param normMax Largest normalized value
-     * @return A new map with double values within [normMin, normMax]
-     */
-    public static <K, V extends Number & Comparable<V>> Map<K, Double> normalizeMapBetween(Map<K, V> map, double normMin, double normMax) {
-        if (map.size() < 2) return new HashMap<>();
-        Collection<V> values = new ArrayList<>(map.values());
-
-        double normRange = normMax - normMin;
-        double mapMin = Collections.min(values).doubleValue();
-        double mapRange = Collections.max(values).doubleValue() - mapMin;
-        double rangeFactor = normRange / mapRange;
-
-        Map<K, Double> normalizedMap = new HashMap<>();
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            normalizedMap.put(entry.getKey(), normMin + (entry.getValue().doubleValue() - mapMin) * rangeFactor);
-        }
-
-        return normalizedMap;
     }
 
 
@@ -113,3 +107,4 @@ public class MapUtils {
         return mergedMap;
     }
 }
+"""
