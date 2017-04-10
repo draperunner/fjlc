@@ -6,3 +6,5 @@
 fjlc/res/tweets/*
 __pycache__/
 
+build/
+dist/
