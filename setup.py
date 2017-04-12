@@ -1,14 +1,21 @@
-import sys
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 # To use a consistent encoding
-from codecs import open
 from os import path
+import subprocess
+
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+# Try to create an rst long_description from README.md
+try:
+    args = 'pandoc', '--to', 'rst', 'README.md'
+    long_description = subprocess.check_output(args)
+    long_description = long_description.decode()
+except Exception as error:
+    print('README.md conversion to reStructuredText failed. Error:')
+    print(error)
+    print('Setting long_description to None.')
+    long_description = None
 
 setup(
     name='fjlc',
@@ -16,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.0.0b1',
+    version='1.0.0',
 
     description='A Python port of the Fredriksen-Jahren Lexicon Classifier',
     long_description=long_description,
@@ -41,10 +48,10 @@ setup(
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Natural Language Processing :: Sentiment Analysis',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
 
         # Pick your license as you wish (should match "license" above)
-        'License :: MIT License',
+        'License :: OSI Approved :: MIT License',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.

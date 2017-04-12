@@ -3,8 +3,8 @@
 *.xml
 *.egg-info
 *.pyc
+*.sh
 fjlc/res/tweets/*
 __pycache__/
-
 build/
 dist/

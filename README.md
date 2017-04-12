@@ -1,5 +1,7 @@
 # Lexicon Classifier
 
+Source code: https://github.com/draperunner/fjlc
+
 This package is a Python port of the Lexicon Creator and Classifier of Valerij Fredriksen and Brage Ekroll Jahren (2016).
 It is compatible with Python version >= 3.
 
