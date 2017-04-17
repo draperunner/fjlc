@@ -40,12 +40,15 @@ class LexicalToken:
         return self.at_end_of_sentence
 
     def intensify_token(self, intensification):
-        self.intensification = intensification
+        self.intensification *= intensification
 
     def is_under_intensification(self):
         return self.intensification != 1
 
-    def to_string(self):
+    def __str__(self):
         return "[" + self.phrase + (
-            "_NEG" if self.is_in_negated_context() else "") + " | " + self.get_sentiment_value() + " | " + str(
+            "_NEG" if self.is_in_negated_context() else "") + " | " + str(self.get_sentiment_value()) + " | " + str(
             self.intensification) + "]"
+
+    def __repr__(self):
+        return self.__str__()
