@@ -12,7 +12,6 @@ class TokenTrie:
         @param sentences List of Strings of all the phrases which are whitespace delimited n-grams
         """
         self.root = TokenTrie.Node()
-
         for sentence in sentences:
             words = RegexFilters.WHITESPACE.split(sentence)
             self.add_token_sequence(words)
@@ -27,11 +26,13 @@ class TokenTrie:
 
     def has_tokens(self, phrase):
         """
-        Checks if phrase or sub-phrase exists in the tree. If set of phrases contains phrases such as: "state", "of the"
-        and "state of the art", look up on:
+        Checks if phrase or sub-phrase exists in the tree.
+
+        If set of phrases contains phrases such as: "state", "of the" and "state of the art", look up on:
         "state" returns true, "of" returns null, "of the art" returns false.
 
-        :param: phrase Phrase or sub-phrase to look up.
+        :param phrase: Phrase or sub-phrase to look up.
+        :type: phrase: list of str
         :return: Returns true if phrase in its entirety is in the tree,
         null if part of the phrase matches a larger tokenSequence,
         false if phrases matches no other phrase entirely and not part any longer phrase.
@@ -53,6 +54,7 @@ class TokenTrie:
         Finds word-ranges all of phrases in tokens stored in TokenTrie
 
         :param tokens: Sequence of tokens to find phrases in
+        :type tokens: list of str
         :return: List of Tokens found in tokens
         """
         tracked_words = []
@@ -75,7 +77,9 @@ class TokenTrie:
         Finds longest, non-overlapping word-ranges of phrases in tokens stored in TokenTrie
 
         :param tokens: tokens tokenize
+        :type tokens: list of str
         :return: Optimal allocation of tokens to phrases
+        :rtype: list of TokenTrie.Token
         """
         token_ranges = self.find_tracked_words(tokens)
         token_ranges.sort()
@@ -155,6 +159,12 @@ class TokenTrie:
             size_diff = other.get_phrase_length() - self.get_phrase_length()
             diff = size_diff if size_diff != 0 else other.get_start_index() - self.get_start_index()
             return diff == 0
+
+        def __str__(self):
+            return str(self.token_sequence)
+
+        def __repr__(self):
+            return "Token(" + str(self.start_index) + "," + str(self.end_index) + ")<" + str(self.token_sequence) + ">"
 
     class Node:
 
