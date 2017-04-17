@@ -85,10 +85,10 @@ class TokenTrie:
             for candidate in token_ranges[offset:]:
                 for i in range(offset):
                     if token_ranges[i].overlaps_with(candidate):
-                        to_be_removed.append(i)
+                        to_be_removed.append(candidate)
                         break
 
-            token_ranges = [token for token in token_ranges if token_ranges.index(token) not in to_be_removed]
+            token_ranges = [token for token in token_ranges if token not in to_be_removed]
 
         token_ranges.sort(key=lambda token: token.get_start_index())
         return token_ranges
