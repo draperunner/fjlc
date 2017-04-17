@@ -64,7 +64,7 @@ class LexiconClassifier:
     def __init__(self,
                  lexicon=path.join(path.abspath(path.dirname(__file__)), "res/data/lexicon.pmi.json"),
                  options=path.join(path.abspath(path.dirname(__file__)), "res/data/options.pmi.json"),
-                 dictionary=path.join(path.abspath(path.dirname(__file__)), "res/dictionary.json")):
+                 dictionary=path.join(path.abspath(path.dirname(__file__)), "res/data/canonical.json")):
         self.lexicon = lexicon
         self.options = options
         self.dictionary = dictionary

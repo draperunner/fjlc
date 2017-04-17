@@ -93,7 +93,7 @@ setup(
     package_data={
         'fjlc': ['res/data/lexicon.pmi.json',
                  'res/data/options.pmi.json',
-                 'res/dictionary.json'
+                 'res/data/canonical.json'
                 ]
     },
 
