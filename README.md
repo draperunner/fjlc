@@ -26,18 +26,14 @@ lc = LexiconClassifier()
 
 You can classify a single tweet or a list of tweets:
 ```
->>> lc.classify("I am happy!")
-'POSITIVE'
->>> lc.classify(["I am happy!", "I hate rain"])
-['POSITIVE', 'NEGATIVE']
+lc.classify("I am happy!")  # 'POSITIVE'
+lc.classify(["I am happy!", "I hate rain"])  # ['POSITIVE', 'NEGATIVE']
 ```
 
 You can get the sentiment value of a single tweet or multiple tweets
 ```
->>> lc.classify("I am happy!")
-5.599244615570646
->>> lc.classify(["I am happy!", "I hate rain"])
-[5.599244615570646, -2.767224666516315]
+lc.calculate_sentiment("I am happy!")  # 5.599244615570646
+lc.calculate_sentiment(["I am happy!", "I hate rain"])  # [5.599244615570646, -2.767224666516315]
 ```
 
 ### Options
